@@ -30,7 +30,7 @@ export default function HosDashboard() {
     // ... logika navigasi
   };
 
-  return (
-    // ... sisa kode lainnya (tampilan dashboard)
-  );
+  return ();
 }
+
+    // ... sisa kode lainnya (tampilan dashboard(masukkan di dalam return())));
