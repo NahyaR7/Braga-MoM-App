@@ -37,7 +37,8 @@ export default function MomListPage() {
   if (isLoading || isUsersLoading) return <div className="text-white text-center">Memuat data...</div>;
   if (error) return <div className="text-red-500 text-center">Error: {error.message}</div>;
 
-  return (
-    // ... sisa kode lainnya (tampilan tabel)
-  );
+  return ();
 }
+
+
+    // ... sisa kode lainnya (tampilan tabel(masukkan ke dalam return ()))
