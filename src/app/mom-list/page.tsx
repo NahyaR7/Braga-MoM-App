@@ -37,7 +37,12 @@ export default function MomListPage() {
   if (isLoading || isUsersLoading) return <div className="text-white text-center">Memuat data...</div>;
   if (error) return <div className="text-red-500 text-center">Error: {error.message}</div>;
 
-  return ();
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-8">
+    {/* Tambahkan elemen untuk tabel atau daftar MoM di sini */}
+    <h1>Daftar MoM</h1>
+  </div>
+  );
 }
 
 
