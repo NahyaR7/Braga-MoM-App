@@ -12,8 +12,24 @@ import { useSession } from 'next-auth/react';
 
 export default function MomListPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const isHeadOfSales = session?.user.role === 'HEAD_OF_SALES';
+  const { data: session, status } = useSession();
+
+  // Redirect jika belum terautentikasi atau masih memuat
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  // Jika sesi belum tersedia, tampilkan loading atau null untuk mencegah error
+  if (status !== 'authenticated') {
+    return <div className="text-white text-center">Memuat autentikasi...</div>;
+  }
+
+  // Sekarang aman untuk mengakses `session.user`
+  // asumsikan file auth Anda sudah diperbaiki untuk menyertakan `role`
+  const isHeadOfSales = session?.user?.role === 'HEAD_OF_SALES';
 
   const { data: moMs, isLoading, error } = isHeadOfSales ? api.mom.getAll.useQuery() : api.mom.getMyMoMs.useQuery();
   const { data: allUsersData, isLoading: isUsersLoading } = api.user.getAll.useQuery();
@@ -24,9 +40,9 @@ export default function MomListPage() {
 
   useEffect(() => {
     if (!moMs) return;
-
+    
+    // Logika filtering Anda yang sudah ada
     let tempMoMs = moMs;
-    // ... logika filter yang sama
     setFilteredMoMs(tempMoMs);
   }, [filter, moMs]);
 
@@ -39,9 +55,9 @@ export default function MomListPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-    {/* Tambahkan elemen untuk tabel atau daftar MoM di sini */}
-    <h1>Daftar MoM</h1>
-  </div>
+      {/* Tambahkan elemen untuk tabel atau daftar MoM di sini */}
+      <h1>Daftar MoM</h1>
+    </div>
   );
 }
 
