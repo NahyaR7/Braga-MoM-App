@@ -32,7 +32,7 @@ export default function AmDashboard() {
     ai => ai.status === 'ACTIVE' && new Date(ai.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
 
-  const handleUpdateActionItemStatus = (actionItemId: string, newStatus: string) => {
+  const handleUpdateActionItemStatus = (actionItemId: string, newStatus: "COMPLETED" | "ACTIVE") => {
     updateStatus({ id: actionItemId, status: newStatus });
   };
 
