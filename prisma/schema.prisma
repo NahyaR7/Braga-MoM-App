@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -37,43 +37,59 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          UserRole  @default(AM) 
+  role          UserRole  @default(AM)
+  password      String?
 
-  // Hubungan: Satu User bisa membuat banyak MoM
+  // Hubungan: Satu User bisa membuat banyak MoM dan Post
   createdMoMs   MoM[]
+  posts         Post[] // Ini sudah benar, tidak perlu diubah.
   accounts      Account[]
   sessions      Session[]
 
   @@map("users") // Nama tabel di database
 }
 
+// Cetakan untuk data Post (TAMBAHAN PENTING)
+model Post {
+  id          String   @id @default(cuid())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Hubungan: Satu Post dibuat oleh satu User
+  createdById String
+  createdBy   User    @relation(fields: [createdById], references: [id])
+
+  @@map("posts")
+}
+
 // Cetakan untuk data MoM
 model MoM {
-  id               String       @id @default(cuid())
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id              String       @id @default(cuid())
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  clientName       String
-  meetingDate      DateTime
-  status           MoMStatus    @default(ACTIVE)
+  clientName      String
+  meetingDate     DateTime
+  status          MoMStatus    @default(ACTIVE)
 
   // Menyimpan array string sebagai format JSON
-  discussionPoints Json         @default("[]")
-  decisions        Json         @default("[]")
+  discussionPoints Json        @default("[]")
+  decisions        Json        @default("[]")
 
   // Hubungan: MoM ini dibuat oleh satu User
-  authorId         String
-  author           User         @relation(fields: [authorId], references: [id])
+  authorId        String
+  author          User         @relation(fields: [authorId], references: [id])
 
   // Hubungan: Satu MoM bisa punya banyak Action Item
-  actionItems      ActionItem[]
+  actionItems     ActionItem[]
 
   @@map("moms")
 }
 
 // Cetakan untuk data Action Item
 model ActionItem {
-  id          String           @id @default(cuid())
+  id          String         @id @default(cuid())
   description String
   deadline    DateTime
   status      ActionItemStatus @default(ACTIVE)

@@ -2,7 +2,13 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-const AmDetailModal = ({ am, onClose }) => {
+// Definisikan tipe untuk props
+interface AmDetailModalProps {
+  am: { name: string } | null; // Asumsi 'am' adalah objek dengan properti 'name' atau null
+  onClose: () => void;
+}
+
+const AmDetailModal: React.FC<AmDetailModalProps> = ({ am, onClose }) => {
   return (
     <Dialog open={!!am} onOpenChange={onClose}>
       <DialogContent>
