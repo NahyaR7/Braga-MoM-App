@@ -60,7 +60,7 @@ export const momRouter = createTRPCRouter({
       orderBy: { createdAt: "desc" },
       include: {
         author: true, // Sertakan data penulis (User)
-        actionItems: true, // Sertakan data action items
+        actionItems: true, // Tambahkan baris ini untuk menyertakan ActionItems
       },
     });
   }),
