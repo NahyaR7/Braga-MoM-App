@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import StatCard from '@/components/StatCard';
 import { Users as UsersIcon, ClipboardCheck as ClipboardCheckIcon } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import { api } from '@/trpc/react';
+import { api, type RouterOutputs } from '@/trpc/react'; // Import RouterOutputs
 
 export default function AmDashboard() {
   const { data: moMs, isLoading, error } = api.mom.getMyMoMs.useQuery();
@@ -17,13 +17,22 @@ export default function AmDashboard() {
   if (error) return <div className="text-red-500 text-center">Error: {error.message}</div>;
   if (!moMs) return null;
 
-  const amMoMs = moMs;
-  const totalMeetings = amMoMs.length;
-  const allActionItems = amMoMs.flatMap(m => m.actionItems);
-  const activeActionItems = allActionItems.filter(ai => ai.status === 'ACTIVE').length;
-  const nearingDeadlineItems = allActionItems.filter(ai => ai.status === 'ACTIVE' && new Date(ai.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  // Mendefinisikan tipe data untuk MoM yang diambil dari TRPC
+  // Ini adalah solusi untuk error 'implicitly has an 'any' type'
+  type MoMWithActionItems = RouterOutputs['mom']['getMyMoMs'][number];
 
-  const handleUpdateActionItemStatus = (actionItemId, newStatus) => {
+  const amMoMs: MoMWithActionItems[] = moMs;
+  const totalMeetings = amMoMs.length;
+  
+  // TypeScript sekarang tahu bahwa m memiliki properti actionItems
+  const allActionItems = amMoMs.flatMap(m => m.actionItems);
+  
+  const activeActionItems = allActionItems.filter(ai => ai.status === 'ACTIVE').length;
+  const nearingDeadlineItems = allActionItems.filter(
+    ai => ai.status === 'ACTIVE' && new Date(ai.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  );
+
+  const handleUpdateActionItemStatus = (actionItemId: string, newStatus: string) => {
     updateStatus({ id: actionItemId, status: newStatus });
   };
 
