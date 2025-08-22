@@ -1,7 +1,7 @@
 // src/server/api/routers/user.ts
 
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc"; // Make sure to import protectedProcedure
 import { hash } from "bcrypt";
 import { UserRole } from "@prisma/client";
 
@@ -31,4 +31,12 @@ export const userRouter = createTRPCRouter({
 
       return newUser;
     }),
+
+  // Tambahkan prosedur getAll di sini
+  getAll: protectedProcedure.query(({ ctx }) => {
+    // Prosedur ini mengambil semua pengguna dari database
+    return ctx.db.user.findMany({
+      orderBy: { name: 'asc' },
+    });
+  }),
 });
