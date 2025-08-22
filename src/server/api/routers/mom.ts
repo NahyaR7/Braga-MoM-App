@@ -32,7 +32,7 @@ export const momRouter = createTRPCRouter({
       const { clientName, meetingDate, discussionPoints, decisions, actionItems } = input;
       const userId = ctx.session.user.id; // Mendapatkan ID pengguna dari sesi
 
-      const newMom = await ctx.db.mom.create({
+      const newMom = await ctx.db.moM.create({
         data: {
           clientName,
           meetingDate: new Date(meetingDate),
@@ -56,7 +56,7 @@ export const momRouter = createTRPCRouter({
 
   // Prosedur untuk mendapatkan semua MoM
   getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.mom.findMany({
+    return ctx.db.moM.findMany({
       orderBy: { createdAt: "desc" },
       include: {
         author: true, // Sertakan data penulis (User)
@@ -67,7 +67,7 @@ export const momRouter = createTRPCRouter({
 
   // Prosedur untuk mendapatkan MoM berdasarkan user yang login (untuk AM)
   getMyMoMs: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.mom.findMany({
+    return ctx.db.moM.findMany({
       where: { authorId: ctx.session.user.id },
       orderBy: { createdAt: "desc" },
       include: {
@@ -91,7 +91,7 @@ export const momRouter = createTRPCRouter({
   getMoMDetails: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(({ ctx, input }) => {
-      return ctx.db.mom.findUnique({
+      return ctx.db.moM.findUnique({
         where: { id: input.id },
         include: {
           author: true,

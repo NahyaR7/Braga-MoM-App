@@ -7,7 +7,7 @@ import StatCard from '@/components/StatCard';
 import CalendarView from '@/components/CalendarView';
 import AmDetailModal from '@/components/AmDetailModal';
 import { Users as UsersIcon, Briefcase as BriefcaseIcon, ClipboardCheck as ClipboardCheckIcon, List as ListIcon, Calendar as CalendarIcon } from 'lucide-react';
-import { api, type RouterOutputs } from '@/trpc/react'; // Pastikan RouterOutputs diimpor
+import { api, type RouterOutputs } from '@/trpc/react';
 
 export default function HosDashboard() {
   const [selectedAm, setSelectedAm] = useState(null);
@@ -21,16 +21,19 @@ export default function HosDashboard() {
   if (!moMs || !allUsers) return null;
 
   // Definisikan tipe data untuk MoM dan User
-  type AllMoMs = RouterOutputs['mom']['getAll'];
+  // Solusi: Ambil tipe data dari query dan pastikan properti yang diperlukan ada.
+  // Dengan ini, TypeScript akan tahu bahwa 'actionItems' itu ada.
+  type MoMWithActionItems = RouterOutputs['mom']['getAll'][number];
   type AllUsers = RouterOutputs['user']['getAll'];
 
   // Terapan tipe data pada variabel
   const totalAm = (allUsers as AllUsers).filter(u => u.role === 'AM').length;
-  const totalMeetings = (moMs as AllMoMs).length;
-  const totalActiveActionItems = (moMs as AllMoMs).flatMap(m => m.actionItems).filter(ai => ai.status === 'ACTIVE').length;
+  const totalMeetings = (moMs as MoMWithActionItems[]).length;
 
-  const onOpenAmDetail = (am: any) => setSelectedAm(am); // Tambahkan tipe 'any' sementara jika struktur belum final
+  // Kode ini akan berfungsi karena tipe MoMWithActionItems sekarang valid
+  const totalActiveActionItems = (moMs as MoMWithActionItems[]).flatMap(m => m.actionItems).filter(ai => ai.status === 'ACTIVE').length;
 
+  const onOpenAmDetail = (am: any) => setSelectedAm(am);
   const onOpenMomDetail = (mom: any) => {
     // ... logika navigasi
   };
@@ -39,19 +42,19 @@ export default function HosDashboard() {
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-8">Dashboard Head of Sales</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
+        <StatCard
           title="Total Account Managers"
           value={totalAm}
           icon={<UsersIcon size={24} />}
           color="bg-indigo-600"
         />
-        <StatCard 
+        <StatCard
           title="Total Rapat (MoM)"
           value={totalMeetings}
           icon={<BriefcaseIcon size={24} />}
           color="bg-green-600"
         />
-        <StatCard 
+        <StatCard
           title="Action Items Aktif"
           value={totalActiveActionItems}
           icon={<ClipboardCheckIcon size={24} />}
@@ -63,13 +66,13 @@ export default function HosDashboard() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Tampilan Rapat</h2>
         <div className="space-x-2">
-          <button 
+          <button
             onClick={() => setViewMode('list')}
             className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-indigo-500' : 'bg-gray-700'}`}
           >
             <ListIcon size={20} />
           </button>
-          <button 
+          <button
             onClick={() => setViewMode('calendar')}
             className={`p-2 rounded-md ${viewMode === 'calendar' ? 'bg-indigo-500' : 'bg-gray-700'}`}
           >

@@ -1,8 +1,8 @@
 // src/server/api/routers/user.ts
 
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc"; // Make sure to import protectedProcedure
-import { hash } from "bcrypt";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
+import { hash } from "bcrypt"; // FIX: Tambahkan impor ini
 import { UserRole } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
@@ -24,7 +24,7 @@ export const userRouter = createTRPCRouter({
         data: {
           name,
           email,
-          password: hashedPassword, // Simpan password yang sudah di-hash
+          password: hashedPassword,
           role: UserRole.AM, // Default role untuk pengguna baru
         },
       });

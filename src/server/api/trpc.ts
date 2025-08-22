@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
+import { UserRole } from "@prisma/client";
 
 /**
  * 1. CONTEXT
@@ -131,3 +132,19 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Procedure khusus untuk role ADMIN.
+ *
+ * Ini akan memeriksa apakah pengguna yang login memiliki role HEAD_OF_SALES (ADMIN).
+ */
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session?.user.role !== UserRole.HEAD_OF_SALES) { // Sesuaikan dengan Enum Anda
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+  return next({
+    ctx: {
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
