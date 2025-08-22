@@ -31,7 +31,8 @@ export default function LoginPage() {
     },
   });
 
-  const handleAuth = async (e) => {
+  // FIX: Tambahkan tipe `React.FormEvent<HTMLFormElement>` pada parameter `e`
+  const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
