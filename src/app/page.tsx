@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { LatestPost } from "@/app/_components/post";
-import auth from "next-auth/next";
+import { auth } from "next-auth/next";
 import { api, HydrateClient } from "@/trpc/server";
 
 export default async function Home() {
