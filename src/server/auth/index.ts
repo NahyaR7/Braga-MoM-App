@@ -106,12 +106,9 @@
 
 // src/server/auth/index.ts
 
-import NextAuth from "next-auth"; // Import NextAuth
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import {
-  type NextAuthOptions,
-  type DefaultSession,
-} from "next-auth";
+import { type NextAuthOptions, type DefaultSession } from "next-auth";
+import auth from "next-auth"; // Perbaikan: import default auth
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { db } from "@/server/db";
@@ -178,6 +175,11 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+};
+
+// Buat wrapper untuk auth
+export const getServerAuthSession = async () => {
+  return await auth();
 };
 
 /**
