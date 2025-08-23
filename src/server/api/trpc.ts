@@ -166,7 +166,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { auth } from "next-auth"; // Perbaikan: Gunakan impor yang benar
+import auth from "next-auth"; // Perbaikan: Gunakan impor yang benar
 import { db } from "@/server/db";
 import { UserRole } from "@prisma/client";
 
