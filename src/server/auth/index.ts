@@ -1,139 +1,29 @@
-// // src/server/auth/index.ts
+// Alamat File: src/server/auth/index.ts
 
-// import { PrismaAdapter } from "@auth/prisma-adapter";
-// import { type GetServerSidePropsContext } from "next";
-// import {
-//   getServerSession,
-//   type NextAuthOptions,
-//   type DefaultSession,
-// } from "next-auth";
-// import DiscordProvider from "next-auth/providers/discord";
-// import CredentialsProvider from "next-auth/providers/credentials";
-// import { compare } from "bcrypt";
-
-// import { env } from "@/env";
-// import { db } from "@/server/db";
-// import { UserRole } from "@prisma/client";
-
-// /**
-//  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
-//  * object and keep type safety.
-//  */
-// declare module "next-auth" {
-//   interface Session extends DefaultSession {
-//     user: DefaultSession["user"] & {
-//       id: string;
-//       role: UserRole; // <--- INI ADALAH BAGIAN KRITIS YANG HILANG ATAU TIDAK TERDETEKSI
-//     };
-//   }
-// }
-
-// /**
-//  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
-//  */
-// export const authOptions: NextAuthOptions = {
-//   adapter: PrismaAdapter(db),
-//   providers: [
-//     // ... (providers lainnya)
-//     CredentialsProvider({
-//       name: "Credentials",
-//       credentials: {
-//         email: { label: "Email", type: "email" },
-//         password: { label: "Password", type: "password" },
-//       },
-//       async authorize(credentials) {
-//         if (!credentials?.email || !credentials?.password) {
-//           throw new Error("Invalid credentials");
-//         }
-
-//         const user = await db.user.findUnique({
-//           where: {
-//             email: credentials.email,
-//           },
-//         });
-
-//         if (!user || !user.password) {
-//           throw new Error("Invalid credentials");
-//         }
-
-//         const isPasswordValid = await compare(
-//           credentials.password,
-//           user.password,
-//         );
-
-//         if (!isPasswordValid) {
-//           throw new Error("Invalid credentials");
-//         }
-        
-//         // Pastikan objek user yang dikembalikan memiliki properti role
-//         return {
-//           id: user.id,
-//           name: user.name,
-//           email: user.email,
-//           role: user.role, // <--- INI SANGAT PENTING
-//         };
-//       },
-//     }),
-//   ],
-//   callbacks: {
-//     // Callback `jwt` untuk menambahkan role ke token JWT
-//     jwt: async ({ token, user }) => {
-//       if (user) {
-//         token.role = (user as any).role;
-//       }
-//       return token;
-//     },
-//     // Callback `session` untuk mengambil role dari token dan menambahkannya ke sesi
-//     session: ({ session, token }) => {
-//       session.user.role = token.role as UserRole;
-//       return session;
-//     },
-//   },
-// };
-
-// /**
-//  * Wrapper for `getServerSession` so that you don't need to import `authOptions` in every file.
-//  */
-// export const getServerAuthSession = (ctx: {
-//   req: GetServerSidePropsContext["req"];
-//   res: GetServerSidePropsContext["res"];
-// }) => {
-//   return getServerSession(ctx.req, ctx.res, authOptions);
-// };
-
-
-
-
-// src/server/auth/index.ts
-
+import NextAuth, { type NextAuthOptions, type DefaultSession } from "next-auth"; // 1. Impor yang lebih lengkap
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type NextAuthOptions, type DefaultSession } from "next-auth";
-import auth from "next-auth"; // Perbaikan: import default auth
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
+
 import { db } from "@/server/db";
 import { UserRole } from "@prisma/client";
+import { env } from "@/env";
 
-/**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- */
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: DefaultSession["user"] & {
       id: string;
-      role: UserRole; // <--- This ensures the 'role' property is recognized
+      role: UserRole;
     };
+  }
+  interface User {
+    role: UserRole;
   }
 }
 
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- */
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
   providers: [
-    // ... (other providers)
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -150,7 +40,10 @@ export const authOptions: NextAuthOptions = {
         if (!user || !user.password) {
           throw new Error("Invalid credentials");
         }
-        const isPasswordValid = await compare(credentials.password, user.password);
+        const isPasswordValid = await compare(
+          credentials.password,
+          user.password,
+        );
         if (!isPasswordValid) {
           throw new Error("Invalid credentials");
         }
@@ -158,31 +51,27 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role, // <--- Crucial: Return the 'role' property
+          role: user.role,
         };
       },
     }),
   ],
+  // 2. Callback disederhanakan untuk strategi "database"
   callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.role = (user as any).role;
-      }
-      return token;
-    },
-    session: ({ session, token }) => {
-      session.user.role = token.role as UserRole;
+    session({ session, user }) {
+      session.user.id = user.id;
+      session.user.role = user.role;
       return session;
     },
   },
+  session: {
+    strategy: "database", // Menggunakan strategi database karena ada adapter
+  },
+  secret: env.AUTH_SECRET,
 };
 
-// Buat wrapper untuk auth
-export const getServerAuthSession = async () => {
-  return await auth();
-};
+// 3. Ekspor handlers, auth, dll dari NextAuth
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
 
-/**
- * Generate handlers from authOptions for use in API routes.
- */
-export const { handlers } = NextAuth(authOptions);
+// 4. Helper untuk mendapatkan sesi di Server Components
+export const getServerAuthSession = () => auth();

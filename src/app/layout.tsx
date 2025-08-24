@@ -1,9 +1,12 @@
+// Alamat File: src/app/layout.tsx
+
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist_Sans } from "next/font/google"; // Pastikan nama font ini sesuai
 
 import { TRPCReactProvider } from "@/trpc/react";
+import AuthProvider from "@/app/_components/AuthProvider"; // 1. Import AuthProvider yang baru dibuat
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -11,18 +14,23 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
+const geist = Geist_Sans({ // Pastikan variabel ini sesuai dengan import di atas
   subsets: ["latin"],
   variable: "--font-geist-sans",
 });
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          {/* 2. Bungkus children dengan AuthProvider */}
+          <AuthProvider>{children}</AuthProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );
